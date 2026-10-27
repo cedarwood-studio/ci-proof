@@ -6,13 +6,13 @@
 
 Your pipeline is written for your repo and stack; this one is ours, kept green as a
 working example. Every client harness is cross-checked against our checklist. This repo
-isn't something we install on your project — it's a small, real, two-language codebase
+isn't something we install on your project: it's a small, real, two-language codebase
 that shows the kind of harness we build and proves the discipline behind it, live, on
 every push.
 
 ## What we check (categories, not implementation)
 
-Every client harness — adapted to your languages, your test runner, your stack — is
+Every client harness (adapted to your languages, your test runner, your stack) is
 checked against the same internal list, organized by what it's checking rather than how:
 
 | Category | Kinds of checks |
@@ -26,20 +26,20 @@ checked against the same internal list, organized by what it's checking rather t
 | **Observability** | Status badges, run summaries, artifact retention, schedule-vs-run-history reconciliation |
 | **Maintainability** | A handoff doc, clear naming, one gate a branch-protection rule can point at |
 
-The checklist itself isn't published — it's our working document, and it keeps changing
-as we learn — but the categories above are exactly what gets run through on every
+The checklist itself isn't published (it's our working document, and it keeps changing
+as we learn), but the categories above are exactly what gets run through on every
 engagement, scoped to the proof rung the job actually needs (charter D30's proof ladder:
 lowest rung the stakes require, never a fortnight of harness for a one-day task).
 
 ## See it run
 
-- [Actions](https://github.com/cedarwood-studio/ci-proof/actions) — every workflow run,
+- [Actions](https://github.com/cedarwood-studio/ci-proof/actions): every workflow run,
   live.
-- [`node-service/`](./node-service) — the TypeScript sample: an Express quote calculator
+- [`node-service/`](./node-service): the TypeScript sample: an Express quote calculator
   with unit tests, an HTTP integration test, and a Dockerfile with a real healthcheck.
-- [`python-service/`](./python-service) — the Python sample: an invoice calculator with
+- [`python-service/`](./python-service): the Python sample: an invoice calculator with
   the same shape of tests.
-- [`TEMPLATE.md`](./TEMPLATE.md) — how we adapt this harness's *shape* to a client repo;
+- [`TEMPLATE.md`](./TEMPLATE.md): how we adapt this harness's *shape* to a client repo;
   it is never pasted in wholesale.
 
 ## How we work
