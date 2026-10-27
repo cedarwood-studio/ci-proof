@@ -1,0 +1,1 @@
+# No runtime dependencies — this package is pure Python by design.

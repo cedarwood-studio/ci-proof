@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    name: Node (${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: node-service
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: node-service/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (eslint)
+        run: npm run lint
+
+      - name: Format check (prettier)
+        run: npm run format:check
+
+      - name: Typecheck (tsc)
+        run: npm run typecheck
+
+      - name: Unit + integration tests (coverage, floor enforced)
+        run: npm run test:coverage
+
+      - name: Integration test (explicit)
+        run: npm run test:integration
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-coverage-${{ matrix.node-version }}
+          path: node-service/coverage
+          retention-days: 14
+
+  python:
+    name: Python (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python-service
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: python-service/requirements*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt -e .
+
+      - name: Lint + format check (ruff)
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Typecheck (mypy)
+        run: mypy src
+
+      - name: Unit + integration tests (coverage, floor enforced)
+        run: pytest
+
+      - name: Integration test (explicit)
+        run: pytest tests/test_integration.py -v
+
+      - name: Dependency audit
+        run: pip-audit
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-coverage-${{ matrix.python-version }}
+          path: python-service/.coverage
+          retention-days: 14
+          if-no-files-found: ignore
+
+  required-checks:
+    name: Required checks
+    if: always()
+    needs: [node, python]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All required jobs passed
+        run: |
+          echo "node: ${{ needs.node.result }}"
+          echo "python: ${{ needs.python.result }}"
+          if [ "${{ needs.node.result }}" != "success" ] || [ "${{ needs.python.result }}" != "success" ]; then
+            echo "One or more required jobs did not pass." >&2
+            exit 1
+          fi
