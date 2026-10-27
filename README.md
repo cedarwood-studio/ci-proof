@@ -1,8 +1,8 @@
 # CI Proof
 
-[![CI](https://github.com/locomotive-brain/ci-proof/actions/workflows/ci.yml/badge.svg)](https://github.com/locomotive-brain/ci-proof/actions/workflows/ci.yml)
-[![Security](https://github.com/locomotive-brain/ci-proof/actions/workflows/security.yml/badge.svg)](https://github.com/locomotive-brain/ci-proof/actions/workflows/security.yml)
-[![Docker](https://github.com/locomotive-brain/ci-proof/actions/workflows/docker.yml/badge.svg)](https://github.com/locomotive-brain/ci-proof/actions/workflows/docker.yml)
+[![CI](https://github.com/cedarwood-studio/ci-proof/actions/workflows/ci.yml/badge.svg)](https://github.com/cedarwood-studio/ci-proof/actions/workflows/ci.yml)
+[![Security](https://github.com/cedarwood-studio/ci-proof/actions/workflows/security.yml/badge.svg)](https://github.com/cedarwood-studio/ci-proof/actions/workflows/security.yml)
+[![Docker](https://github.com/cedarwood-studio/ci-proof/actions/workflows/docker.yml/badge.svg)](https://github.com/cedarwood-studio/ci-proof/actions/workflows/docker.yml)
 
 Your pipeline is written for your repo and stack; this one is ours, kept green as a
 working example. Every client harness is cross-checked against our checklist. This repo
@@ -33,7 +33,7 @@ lowest rung the stakes require, never a fortnight of harness for a one-day task)
 
 ## See it run
 
-- [Actions](https://github.com/locomotive-brain/ci-proof/actions) — every workflow run,
+- [Actions](https://github.com/cedarwood-studio/ci-proof/actions) — every workflow run,
   live.
 - [`node-service/`](./node-service) — the TypeScript sample: an Express quote calculator
   with unit tests, an HTTP integration test, and a Dockerfile with a real healthcheck.
