@@ -60,3 +60,5 @@ human review before delivery.
 This repository is currently owned by the `locomotive-brain` GitHub account and will be
 transferred to its owner's personal account; GitHub redirects the old URLs automatically
 once that happens, so the links and badges above keep working.
+
+<!-- CI verification: confirms PR-triggered workflows (dependency-review included) run green. -->
