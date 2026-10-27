@@ -18,11 +18,12 @@ checked against the same internal list, organized by what it's checking rather t
 | Category | Kinds of checks |
 |---|---|
 | **Pipeline structure** | Triggers, concurrency handling, dependency caching, matrix strategy, a single merge-gating job |
-| **Correctness gates** | Lint, typecheck, unit/integration/regression tests, a negotiated coverage floor, a stated flaky-test policy |
+| **Correctness gates** | Lint, typecheck, unit/integration/regression tests, a negotiated coverage floor, a stated flaky-test policy, migration-apply verification |
 | **Security** | Secret scanning, dependency vulnerability scanning, SAST/static analysis, container scanning, least-privilege permissions, pinned actions |
-| **Supply chain** | Lockfile discipline, automated dependency updates, provenance/attestations where cheap |
+| **Supply chain** | Lockfile discipline, automated dependency updates, provenance/attestations where cheap, behavioral/malicious-package scanning, an install-time minimum-release-age floor |
 | **Deploy safety** | Environments and reviewers, a named rollback path, no production credentials from us |
-| **Observability** | Status badges, run summaries, artifact retention |
+| **Deploy verification** | Post-deploy checks against the live deployed artifact, real-browser checks against a deployed preview |
+| **Observability** | Status badges, run summaries, artifact retention, schedule-vs-run-history reconciliation |
 | **Maintainability** | A handoff doc, clear naming, one gate a branch-protection rule can point at |
 
 The checklist itself isn't published — it's our working document, and it keeps changing

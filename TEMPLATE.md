@@ -5,6 +5,14 @@ reading the README. It's the checklist for turning this proof-of-concept into a 
 delivery inside `ventures/marketplace/RUNBOOK.md`'s Build stage (Stage 4), inside a job
 sandbox (`brain/bin/job-sandbox`), against a client's own repository.
 
+**The rule: this repo is an example of our harness's shape, never a wholesale paste.**
+We write a custom harness for the client's own repo and stack, in similar fashion to
+this one, then cross-check it against our actual best-practices checklist —
+`ventures/marketplace/sop/ci-harness-checklist.md` (internal; the published categories
+live in `README.md`). Reach for that SOP, category by category, every time this template
+gets adapted — it's the thing this file's "What to swap" section below is a partial
+echo of, not a replacement for.
+
 ## Ownership note (read first)
 
 This repo is published under `locomotive-brain` — the brain's own GitHub identity, not
@@ -51,6 +59,49 @@ PR) beyond what this repo's own links already carry.
   writing, never assume `main`.
 - Dependabot `directory` paths to the client's actual package manifest locations.
 
+## Adaptation notes: checks added after the showcase cross-check (issue #61)
+
+These six came from cross-checking the SOP against a real build (case study in
+`ventures/marketplace/profile/case-studies/sop-crosscheck.md`). Each is in the SOP
+checklist now; here's how to actually wire each one into a client harness.
+
+- **Migration-apply verification** (correctness gates, category 2) — for any client stack
+  with committed migrations: after the migration tool runs, query its own migrations-log
+  table (or equivalent) and diff the applied rows against the migration files on disk;
+  fail the job if any file has no row. No new tool — the client's existing DB client in
+  the stack is enough. Not in this repo's sample (no DB).
+- **Post-deploy smoke + real-browser checks** (deploy verification, category 8) — fork
+  `.github/workflows/deploy-verify.yml` from this repo. It's disabled by default here
+  (`workflow_dispatch` only, guarded against the placeholder URL) because `ci-proof` has
+  no deploy target to hit. To adapt: swap the placeholder URL for the client's real
+  preview/production URL (or wire it from the platform's own deployment event — add
+  `deployment_status` to `on:`), and keep the real-browser job only if the client's stack
+  has platform-only runtime behavior (edge middleware, bot-protection, env-gated scripts)
+  that local E2E can't see — skip it otherwise rather than paying the Playwright install
+  cost for nothing.
+- **Behavioral/malicious-package scanning** (supply chain, category 4) — Socket.dev's CLI
+  path needs `SOCKET_SECURITY_API_KEY`, which means it's a **client-provisioned step**:
+  the client creates their own Socket.dev account and wires the token into their own
+  secrets store (never ours — same rule as "What to never do" below); we write the
+  workflow step to reference it by name. If the client wants behavioral scanning with no
+  account at all, GuardDog (`pip install guarddog`, Apache-2.0, heuristic + Semgrep rules,
+  no token) is the open alternative — but treat its findings as report-only, not a merge
+  gate, until it's run long enough against this client's lockfile to know its false-
+  positive rate.
+- **Minimum-release-age floor** (supply chain, category 4) — only applies on pnpm. Add a
+  `minimumReleaseAge` setting to the client's pnpm config (e.g. a 24h floor), paired with
+  the fast-path pattern for an urgent critical/high CVE: a per-version pinned exclude
+  (one specific version string), never a bare package name — a bare-name exclude defeats
+  the floor for every future release of that package, not just the one that needs to skip
+  the wait.
+- **Schedule-vs-run-history reconciliation** (observability, category 6) — only worth
+  adding for a client with its own `schedule:`-triggered workflow (this repo's
+  `security.yml` schedule exists alongside push/PR triggers that already run it on every
+  commit, so a dedicated reconciliation check would be moot here). Pattern: a small
+  periodic job that runs `gh run list --workflow=<name> --json createdAt,status --limit 1`
+  and compares the last run's timestamp against the declared cron interval, failing if
+  it's stale by more than ~2x the interval.
+
 ## What to never do
 
 - **Never add secrets to workflow files.** No API keys, tokens, or credentials committed
@@ -82,7 +133,8 @@ PR) beyond what this repo's own links already carry.
 ## Minimal adaptation checklist
 
 1. Fork the shape of `ci.yml`, `security.yml`, `docker.yml` (if containerized),
-   `dependabot.yml` into the client repo.
+   `dependabot.yml` into the client repo; fork `deploy-verify.yml` too if there's a deploy
+   target (see the adaptation notes above).
 2. Swap languages/tools per "What to swap" above.
 3. Run it on a throwaway branch inside the job sandbox first — never the client's `main`.
 4. Watch it go green end to end (`gh run watch`), fixing real failures, not suppressing

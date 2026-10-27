@@ -1,0 +1,75 @@
+name: Deploy verify
+
+# PATTERN, not a live check: ci-proof has no deployed environment, so this
+# workflow is wired to never run on its own. It exists to show the shape of
+# two checks the SOP cross-check added (issue #61) — a required post-deploy
+# smoke check against the live deployed artifact, and a real-browser check
+# against a deployed preview — neither of which a build-only pipeline can do.
+#
+# Adapting this to a client repo (see TEMPLATE.md's "Deploy verification"
+# adaptation note):
+#   1. Replace DEPLOY_URL's placeholder default below with the client's real
+#      preview/production URL, or wire it from the platform's own deploy —
+#      e.g. uncomment `deployment_status` in `on:` and read
+#      `github.event.deployment_status.target_url` instead of the input.
+#   2. Drop the `example.invalid` guard once a real URL is wired in.
+#   3. Keep the browser-smoke job only if this client's stack has
+#      platform-only runtime behavior (edge middleware, bot-protection,
+#      env-gated scripts) that local E2E structurally can't see.
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_url:
+        description: "Deployed URL to verify (placeholder until wired to a real deploy)"
+        required: false
+        default: "https://example.invalid/replace-with-deployed-url"
+  # Uncomment once a real deploy target exists, and read the deployment's own
+  # target_url instead of the workflow_dispatch input:
+  # deployment_status:
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_URL: ${{ github.event.inputs.deploy_url || 'https://example.invalid/replace-with-deployed-url' }}
+
+jobs:
+  smoke:
+    name: Post-deploy smoke check
+    # Guard keeps this a no-op until a real URL replaces the placeholder —
+    # this repo's own Actions history stays green with no deploy target wired.
+    if: ${{ !contains(github.event.inputs.deploy_url || 'example.invalid', 'example.invalid') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit the deployed health endpoint
+        run: curl --fail --silent --show-error "$DEPLOY_URL/health"
+
+  browser-smoke:
+    name: Real-browser check against deployed preview
+    if: ${{ !contains(github.event.inputs.deploy_url || 'example.invalid', 'example.invalid') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright (chromium only)
+        run: |
+          npm install --no-save @playwright/test@1.49
+          npx playwright install --with-deps chromium
+
+      - name: Load the deployed preview in a real browser
+        run: |
+          node -e "
+          const { chromium } = require('@playwright/test');
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            const res = await page.goto(process.env.DEPLOY_URL, { waitUntil: 'networkidle' });
+            if (!res || !res.ok()) {
+              throw new Error('Deployed page did not load: ' + (res && res.status()));
+            }
+            await browser.close();
+          })().catch((err) => { console.error(err); process.exit(1); });
+          "
