@@ -50,7 +50,7 @@ jobs:
     if: ${{ !contains(github.event.inputs.deploy_url || 'example.invalid', 'example.invalid') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
