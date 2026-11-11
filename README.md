@@ -5,14 +5,15 @@
 [![Docker](https://github.com/cedarwood-studio/ci-proof/actions/workflows/docker.yml/badge.svg)](https://github.com/cedarwood-studio/ci-proof/actions/workflows/docker.yml)
 
 Your pipeline is written for your repo and stack; this one is ours, kept green as a
-working example. Every client harness is cross-checked against our checklist. This repo
+working example. When we build a client harness, it will be checked against our
+checklist. This repo
 isn't something we install on your project: it's a small, real, two-language codebase
 that shows the kind of harness we build and proves the discipline behind it, live, on
 every push.
 
 ## What we check (categories, not implementation)
 
-Every client harness (adapted to your languages, your test runner, your stack) is
+A client harness (adapted to your languages, your test runner, your stack) will be
 checked against the same internal list, organized by what it's checking rather than how:
 
 | Category | Kinds of checks |
@@ -27,7 +28,7 @@ checked against the same internal list, organized by what it's checking rather t
 | **Maintainability** | A handoff doc, clear naming, one gate a branch-protection rule can point at |
 
 The checklist itself isn't published (it's our working document, and it keeps changing
-as we learn), but the categories above are exactly what gets run through on every
+as we learn), but the categories above are exactly what will be run through on every
 engagement, scoped to the proof rung the job actually needs (charter D30's proof ladder:
 lowest rung the stakes require, never a fortnight of harness for a one-day task).
 
