@@ -46,9 +46,3 @@ lowest rung the stakes require, never a fortnight of harness for a one-day task)
 
 My studio uses automated verification and AI tooling; you get a green test suite and a
 human review before delivery.
-
----
-
-This repository is currently owned by the `locomotive-brain` GitHub account and will be
-transferred to its owner's personal account; GitHub redirects the old URLs automatically
-once that happens, so the links and badges above keep working.
